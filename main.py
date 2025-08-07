@@ -34,26 +34,24 @@ def read_binary_vdf(path):
 
 # MAIN
 
-print(green("------------- Non Steam Games -------------"))
-get_shortcuts_path("~/.local/share/Steam/userdata/")
 
-for file in shortcuts_folders:
-    shortcut_data = read_binary_vdf(file)
+      
 
-    print("NonSteamGames: ", vdf.dumps(shortcut_data, pretty=True))
 
 library_data = read_vdf("~/.local/share/Steam/config/libraryfolders.vdf")
 loginusers_data = read_vdf("~/.local/share/Steam/config/loginusers.vdf")
+
+print(green("------------- Steam Libraries -------------"))
+for key, value in library_data['libraryfolders'].items():
+    library_folders.append(value.get('path'))
+    print(f"Library {key}: file://{value.get('path')}")
+
 
 
 # print("LibraryDATA: ", library_data)
 # print("LoginUsers: ", loginusers_data)
 
 print(green("------------- Steam Games -------------"))
-for key, value in library_data['libraryfolders'].items():
-    library_folders.append(value.get('path'))
-    print(f"Library {key}: file://{value.get('path')}")
-
 
 
 # Search for app manifests in steamapps
@@ -79,6 +77,35 @@ for file in library_folders:
                 pfx_path = "NULL err" 
                 
             print(red("Name: "), f"{game_name} | {appid}", blue("pfx_path: "), f"file://{pfx_path}")
-    
+print(green("------------- Non Steam Games -------------"))
+get_shortcuts_path("~/.local/share/Steam/userdata/")
+
+for file in shortcuts_folders:
+    #shortcut_data = read_binary_vdf(file)
+    #print("NonSteamGames: ", vdf.dumps(shortcut_data, pretty=True))
+    with open(file, "rb") as sf:
+     shortcuts = vdf.binary_load(sf)
+    root = shortcuts['shortcuts']
+    for key,entry in root.items():
+        # Uncomment to see everything in each shortcut:
+        # print(entry)
+
+        exe = entry.get('Exe')
+        name = entry.get('AppName')
+        appid = entry.get('appid') # signed
+        u_appid = appid & 0xFFFFFFFF #unsigned
+        
+        pfx_path = "Null err"
+        for file in library_folders:
+            path = os.path.join(file, f"steamapps/compatdata/{u_appid}")
+            # print("Path: ", path)
+            if os.path.exists(path):
+                pfx_path = path
+            
+
+
+        print(red("Name: "), f"{name} | {u_appid}", blue("pfx_path: "), f"file://{pfx_path}")
+
+   
     
 

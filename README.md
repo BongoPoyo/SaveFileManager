@@ -18,5 +18,9 @@ It just prints the pfx location
 wget https://github.com/BongoPoyo/SteamSaveMgr/releases/latest/download/linux-x86_64.tar.gz
 tar -xvf linux-x86_64.tar.gz
 chmod +x save-manager
-mv save-manager /usr/local/bin/save-manager
+sudo mv save-manager /usr/local/bin/save-manager
 ```
+
+# Uninstallation
+
+```sudo rm -rf /usr/local/bin/save-manager```

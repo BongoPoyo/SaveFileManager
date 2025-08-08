@@ -14,13 +14,24 @@ It just prints the pfx location
 
 # Installation
 
+Do this:
 ```
-wget https://github.com/BongoPoyo/SteamSaveMgr/releases/latest/download/linux-x86_64.tar.gz
-tar -xvf linux-x86_64.tar.gz
+wget https://github.com/BongoPoyo/SteamSaveMgr/releases/latest/download/save-manager
 chmod +x save-manager
 sudo mv save-manager /usr/local/bin/save-manager
 ```
 
 # Uninstallation
 
-```sudo rm -rf /usr/local/bin/save-manager```
+Just run:
+```
+sudo rm -rf /usr/local/bin/save-manager
+```
+
+# Running
+
+Do:
+```
+save-manager
+
+```

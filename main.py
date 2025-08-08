@@ -1,6 +1,9 @@
 import vdf
 import os
-from simple_colors import *
+from simple_colors import red, blue, green, yellow
+from pathlib import Path
+import yaml
+import re
 # arrays
 shortcuts_folders = []
 library_folders = []
@@ -52,7 +55,16 @@ def get_pfx_paths(file, u_appid):
 library_data = read_vdf("~/.local/share/Steam/config/libraryfolders.vdf")
 loginusers_data = read_vdf("~/.local/share/Steam/config/loginusers.vdf")
 
+print(green("------------- Default prefixes -------------"))
+
+print(blue("Default wine prefix: "), f"file://{os.path.expanduser("~/.wine")}")
+print(blue("Default umu prefix: "),
+      f"file://{os.path.expanduser("~/Games/umu/umu-default/")}")
+print(blue("Default Lutris prefix: "),
+      f"file://{os.path.expanduser("~/Games/")}")
+
 print(green("------------- Steam Libraries -------------"))
+
 for key, value in library_data['libraryfolders'].items():
     library_folders.append(value.get('path'))
     print(f"Library {key}: file://{value.get('path')}")
@@ -85,6 +97,7 @@ for file in library_folders:
             print(red("Name: "), f"{game_name} | {
                   appid}", blue("pfx_path: "), pfx_path)
 print(green("------------- Non Steam Games -------------"))
+
 get_shortcuts_path("~/.local/share/Steam/userdata/")
 
 for file in shortcuts_folders:
@@ -106,3 +119,29 @@ for file in shortcuts_folders:
 
         print(red("Name: "), f"{name} | {u_appid}",
               blue("pfx_path: "), pfx_path)
+
+
+print(green("------------- Lutris Games -------------"))
+lutris_path = os.path.expanduser("~/.local/share/lutris/games/")
+for yaml_file in os.listdir(lutris_path):
+
+    yaml_path = os.path.join(lutris_path, yaml_file)
+    with open(yaml_path, "r") as f:
+        yaml_data = yaml.safe_load(f)
+
+        # removes .yml
+        stem = Path(yaml_file).stem
+
+        # regular expression to remove dash and numbers
+        game_name = re.sub(r'-\d+$', '', stem)
+        exe = f"file://{yaml_data.get("game", {}).get("exe", "")}"
+        if exe == "file://":
+            exe = ""
+
+        pfx_path = f"file://{yaml_data.get("game", {}).get(
+            "prefix", "")}"
+        if pfx_path == "file://":
+            pfx_path = ""
+
+        print(red("Name: "), game_name, yellow("Exe: "),
+              exe, blue("pfx_path"), pfx_path)

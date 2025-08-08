@@ -21,16 +21,31 @@ def get_shortcuts_path(path):
                     shortcuts_folders.append(shortcuts_path)
 
 
+
 def read_vdf(path):
     path = os.path.expanduser(path) # expands ~/ to /home/<username>
     with open(path, encoding='utf-8') as file:
         return vdf.parse(file)
+
 
 def read_binary_vdf(path):
     path = os.path.expanduser(path) # expands ~/ to /home/<username>
     with open(path, "rb") as file:
         return vdf.binary_load(file)
 
+
+
+
+# Necessary as there can be multiple compatdatas
+def get_pfx_paths(file, u_appid):
+    pfx_paths = ""
+    for file in library_folders:
+        path = os.path.join(file, f"steamapps/compatdata/{u_appid}")
+        # print("Path: ", path)
+        if os.path.exists(path):
+            pfx_paths = pfx_paths + " file://" + path
+
+    return pfx_paths
 
 # MAIN
 
@@ -69,14 +84,16 @@ for file in library_folders:
 
             appid = appmanifest_data["AppState"]["appid"]
             game_name = appmanifest_data["AppState"]["name"]
-            pfx_path = os.path.join(path, f"compatdata/{appid}")
+            
+            
 
-            # right now, it only checks for pfx in the same library folder
-            # it should also scan other libraries
-            if not (os.path.exists(pfx_path)):
-                pfx_path = "NULL err" 
+            
+            pfx_path = get_pfx_paths(file, appid) 
+
+           
+
                 
-            print(red("Name: "), f"{game_name} | {appid}", blue("pfx_path: "), f"file://{pfx_path}")
+            print(red("Name: "), f"{game_name} | {appid}", blue("pfx_path: "), pfx_path)
 print(green("------------- Non Steam Games -------------"))
 get_shortcuts_path("~/.local/share/Steam/userdata/")
 
@@ -95,16 +112,11 @@ for file in shortcuts_folders:
         appid = entry.get('appid') # signed
         u_appid = appid & 0xFFFFFFFF #unsigned
         
-        pfx_path = "Null err"
-        for file in library_folders:
-            path = os.path.join(file, f"steamapps/compatdata/{u_appid}")
-            # print("Path: ", path)
-            if os.path.exists(path):
-                pfx_path = path
-            
+
+        pfx_path = get_pfx_paths(file, u_appid) 
 
 
-        print(red("Name: "), f"{name} | {u_appid}", blue("pfx_path: "), f"file://{pfx_path}")
+        print(red("Name: "), f"{name} | {u_appid}", blue("pfx_path: "), pfx_path)
 
    
     

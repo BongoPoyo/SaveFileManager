@@ -7,8 +7,10 @@ library_folders = []
 appmanifests = []
 
 # functions
+
+
 def get_shortcuts_path(path):
-    path = os.path.expanduser(path) # expands ~/ to /home/<username>
+    path = os.path.expanduser(path)  # expands ~/ to /home/<username>
 
     for child_folder in os.listdir(path):
         child_path = os.path.join(path, child_folder)
@@ -21,19 +23,16 @@ def get_shortcuts_path(path):
                     shortcuts_folders.append(shortcuts_path)
 
 
-
 def read_vdf(path):
-    path = os.path.expanduser(path) # expands ~/ to /home/<username>
+    path = os.path.expanduser(path)  # expands ~/ to /home/<username>
     with open(path, encoding='utf-8') as file:
         return vdf.parse(file)
 
 
 def read_binary_vdf(path):
-    path = os.path.expanduser(path) # expands ~/ to /home/<username>
+    path = os.path.expanduser(path)  # expands ~/ to /home/<username>
     with open(path, "rb") as file:
         return vdf.binary_load(file)
-
-
 
 
 # Necessary as there can be multiple compatdatas
@@ -50,9 +49,6 @@ def get_pfx_paths(file, u_appid):
 # MAIN
 
 
-      
-
-
 library_data = read_vdf("~/.local/share/Steam/config/libraryfolders.vdf")
 loginusers_data = read_vdf("~/.local/share/Steam/config/loginusers.vdf")
 
@@ -60,7 +56,6 @@ print(green("------------- Steam Libraries -------------"))
 for key, value in library_data['libraryfolders'].items():
     library_folders.append(value.get('path'))
     print(f"Library {key}: file://{value.get('path')}")
-
 
 
 # print("LibraryDATA: ", library_data)
@@ -74,50 +69,40 @@ for file in library_folders:
     path = os.path.join(file, "steamapps")
     for child_folder in os.listdir(path):
         if child_folder.__contains__("appmanifest"):
-            #print("Children: ", child_folder)
-            
+            # print("Children: ", child_folder)
+
             appmanifest_path = os.path.join(path, child_folder)
-            
+
             appmanifest_data = read_vdf(appmanifest_path)
-            
+
             appmanifests.append(appmanifest_data)
 
             appid = appmanifest_data["AppState"]["appid"]
             game_name = appmanifest_data["AppState"]["name"]
-            
-            
 
-            
-            pfx_path = get_pfx_paths(file, appid) 
+            pfx_path = get_pfx_paths(file, appid)
 
-           
-
-                
-            print(red("Name: "), f"{game_name} | {appid}", blue("pfx_path: "), pfx_path)
+            print(red("Name: "), f"{game_name} | {
+                  appid}", blue("pfx_path: "), pfx_path)
 print(green("------------- Non Steam Games -------------"))
 get_shortcuts_path("~/.local/share/Steam/userdata/")
 
 for file in shortcuts_folders:
-    #shortcut_data = read_binary_vdf(file)
-    #print("NonSteamGames: ", vdf.dumps(shortcut_data, pretty=True))
+    # shortcut_data = read_binary_vdf(file)
+    # print("NonSteamGames: ", vdf.dumps(shortcut_data, pretty=True))
     with open(file, "rb") as sf:
-     shortcuts = vdf.binary_load(sf)
+        shortcuts = vdf.binary_load(sf)
     root = shortcuts['shortcuts']
-    for key,entry in root.items():
+    for key, entry in root.items():
         # Uncomment to see everything in each shortcut:
         # print(entry)
 
         exe = entry.get('Exe')
         name = entry.get('AppName')
-        appid = entry.get('appid') # signed
-        u_appid = appid & 0xFFFFFFFF #unsigned
-        
+        appid = entry.get('appid')  # signed
+        u_appid = appid & 0xFFFFFFFF  # unsigned
 
-        pfx_path = get_pfx_paths(file, u_appid) 
+        pfx_path = get_pfx_paths(file, u_appid)
 
-
-        print(red("Name: "), f"{name} | {u_appid}", blue("pfx_path: "), pfx_path)
-
-   
-    
-
+        print(red("Name: "), f"{name} | {u_appid}",
+              blue("pfx_path: "), pfx_path)

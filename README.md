@@ -14,7 +14,8 @@ It just prints the pfx location
 
 # Installation
 
-```wget https://github.com/BongoPoyo/SteamSaveMgr/releases/latest/download/linux-x86_64.tar.gz
+```
+wget https://github.com/BongoPoyo/SteamSaveMgr/releases/latest/download/linux-x86_64.tar.gz
 tar -xvf linux-x86_64.tar.gz
 chmod +x save-manager
 mv save-manager /usr/local/bin/save-manager

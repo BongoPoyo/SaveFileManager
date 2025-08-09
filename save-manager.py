@@ -1,14 +1,60 @@
+import re
+import yaml
+from pathlib import Path
 import vdf
 import os
 from simple_colors import red, blue, green, yellow
-from pathlib import Path
-import yaml
-import re
+
+
 # arrays
 shortcuts_folders = []
 library_folders = []
 appmanifests = []
 
+
+steam_games = []
+non_steam_games = []
+lutris_games = []
+
+
+class Game:
+    app_id: str
+    game_name: str
+    pfx_path: str
+
+
+class SteamGame(Game):
+
+    def __init__(self, app_id, game_name, pfx_path) -> None:
+        self.app_id = app_id
+        self.game_name = game_name
+        self.pfx_path = pfx_path
+
+    def print(self):
+        print(red("Name: "), f"{self.game_name} | {
+            self.app_id}", blue("pfx_path: "), self.pfx_path)
+
+
+class LutrisGame(Game):
+    def __init__(self, app_id, game_name, pfx_path) -> None:
+        self.app_id = app_id
+        self.game_name = game_name
+        self.pfx_path = pfx_path
+
+    def print(self):
+        print(red("Name: "), f"{self.game_name} | {
+            self.app_id}", blue("pfx_path: "), self.pfx_path)
+
+
+class NonSteamGame(Game):
+    def __init__(self, app_id, game_name, pfx_path) -> None:
+        self.app_id = app_id
+        self.game_name = game_name
+        self.pfx_path = pfx_path
+
+    def print(self):
+        print(red("Name: "), f"{self.game_name} | {
+              self.app_id}", blue("pfx_path: "), self.pfx_path)
 # functions
 
 
@@ -17,7 +63,7 @@ def get_shortcuts_path(path):
 
     for child_folder in os.listdir(path):
         child_path = os.path.join(path, child_folder)
-        if os.path.isdir(child_path) and any(os.scandir(child_path)):
+        if os.path.isdir(child_path):  # and any(os.scandir(child_path)):
             config_path = os.path.join(child_path, "config")
             if os.path.exists(config_path):
                 shortcuts_path = os.path.join(config_path, "shortcuts.vdf")
@@ -93,9 +139,10 @@ for file in library_folders:
             game_name = appmanifest_data["AppState"]["name"]
 
             pfx_path = get_pfx_paths(file, appid)
+            steam_game = SteamGame(appid, game_name, pfx_path)
+            steam_games.append(steam_game)
+            steam_game.print()
 
-            print(red("Name: "), f"{game_name} | {
-                  appid}", blue("pfx_path: "), pfx_path)
 print(green("------------- Non Steam Games -------------"))
 
 get_shortcuts_path("~/.local/share/Steam/userdata/")
@@ -117,8 +164,9 @@ for file in shortcuts_folders:
 
         pfx_path = get_pfx_paths(file, u_appid)
 
-        print(red("Name: "), f"{name} | {u_appid}",
-              blue("pfx_path: "), pfx_path)
+        non_steam_game = NonSteamGame(appid, name, pfx_path)
+        non_steam_games.append(non_steam_game)
+        non_steam_game.print()
 
 
 print(green("------------- Lutris Games -------------"))

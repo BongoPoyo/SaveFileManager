@@ -3,6 +3,7 @@ import yaml
 from pathlib import Path
 import vdf
 import os
+import ui
 from simple_colors import red, blue, green, yellow
 
 
@@ -36,14 +37,16 @@ class SteamGame(Game):
 
 
 class LutrisGame(Game):
-    def __init__(self, app_id, game_name, pfx_path) -> None:
-        self.app_id = app_id
+    exe: str
+
+    def __init__(self, game_name, exe, pfx_path) -> None:
+        self.exe = exe
         self.game_name = game_name
         self.pfx_path = pfx_path
 
     def print(self):
-        print(red("Name: "), f"{self.game_name} | {
-            self.app_id}", blue("pfx_path: "), self.pfx_path)
+        print(red("Name: "), self.game_name, yellow("Exe: "),
+              self.exe, blue("pfx_path"), self.pfx_path)
 
 
 class NonSteamGame(Game):
@@ -191,5 +194,12 @@ for yaml_file in os.listdir(lutris_path):
         if pfx_path == "file://":
             pfx_path = ""
 
-        print(red("Name: "), game_name, yellow("Exe: "),
-              exe, blue("pfx_path"), pfx_path)
+        lutris_game = LutrisGame(game_name, exe, pfx_path)
+
+        lutris_games.append(lutris_game)
+        lutris_game.print()
+
+
+# if __name__ == "__main__":
+#     app = ui.SaveManagerApp()
+#     app.run()

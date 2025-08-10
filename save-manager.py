@@ -4,21 +4,12 @@ from pathlib import Path
 import vdf
 import os
 import ui
+import variables
 from simple_colors import red, blue, green, yellow
 
 
-# arrays
-shortcuts_folders = []
-library_folders = []
-appmanifests = []
-
-
-steam_games = []
-non_steam_games = []
-lutris_games = []
-
-
 class Game:
+
     app_id: str
     game_name: str
     pfx_path: str
@@ -72,7 +63,7 @@ def get_shortcuts_path(path):
                 shortcuts_path = os.path.join(config_path, "shortcuts.vdf")
                 if os.path.exists(shortcuts_path):
                     # print(f"Found: {shortcuts_path}")
-                    shortcuts_folders.append(shortcuts_path)
+                    variables.shortcuts_folders.append(shortcuts_path)
 
 
 def read_vdf(path):
@@ -90,7 +81,7 @@ def read_binary_vdf(path):
 # Necessary as there can be multiple compatdatas
 def get_pfx_paths(file, u_appid):
     pfx_paths = ""
-    for file in library_folders:
+    for file in variables.library_folders:
         path = os.path.join(file, f"steamapps/compatdata/{u_appid}")
         # print("Path: ", path)
         if os.path.exists(path):
@@ -101,8 +92,10 @@ def get_pfx_paths(file, u_appid):
 # MAIN
 
 
-library_data = read_vdf("~/.local/share/Steam/config/libraryfolders.vdf")
-loginusers_data = read_vdf("~/.local/share/Steam/config/loginusers.vdf")
+variables.library_data = read_vdf(
+    "~/.local/share/Steam/config/libraryfolders.vdf")
+variables.loginusers_data = read_vdf(
+    "~/.local/share/Steam/config/loginusers.vdf")
 
 print(green("------------- Default prefixes -------------"))
 
@@ -114,8 +107,8 @@ print(blue("Default Lutris prefix: "),
 
 print(green("------------- Steam Libraries -------------"))
 
-for key, value in library_data['libraryfolders'].items():
-    library_folders.append(value.get('path'))
+for key, value in variables.library_data['libraryfolders'].items():
+    variables.library_folders.append(value.get('path'))
     print(f"Library {key}: file://{value.get('path')}")
 
 
@@ -126,7 +119,7 @@ print(green("------------- Steam Games -------------"))
 
 
 # Search for app manifests in steamapps
-for file in library_folders:
+for file in variables.library_folders:
     path = os.path.join(file, "steamapps")
     for child_folder in os.listdir(path):
         if child_folder.__contains__("appmanifest"):
@@ -136,21 +129,21 @@ for file in library_folders:
 
             appmanifest_data = read_vdf(appmanifest_path)
 
-            appmanifests.append(appmanifest_data)
+            variables.appmanifests.append(appmanifest_data)
 
             appid = appmanifest_data["AppState"]["appid"]
             game_name = appmanifest_data["AppState"]["name"]
 
             pfx_path = get_pfx_paths(file, appid)
             steam_game = SteamGame(appid, game_name, pfx_path)
-            steam_games.append(steam_game)
+            variables.steam_games.append(steam_game)
             steam_game.print()
 
 print(green("------------- Non Steam Games -------------"))
 
 get_shortcuts_path("~/.local/share/Steam/userdata/")
 
-for file in shortcuts_folders:
+for file in variables.shortcuts_folders:
     # shortcut_data = read_binary_vdf(file)
     # print("NonSteamGames: ", vdf.dumps(shortcut_data, pretty=True))
     with open(file, "rb") as sf:
@@ -168,14 +161,14 @@ for file in shortcuts_folders:
         pfx_path = get_pfx_paths(file, u_appid)
 
         non_steam_game = NonSteamGame(appid, name, pfx_path)
-        non_steam_games.append(non_steam_game)
+        variables.non_steam_games.append(non_steam_game)
         non_steam_game.print()
 
 
 print(green("------------- Lutris Games -------------"))
 lutris_path = os.path.expanduser("~/.local/share/lutris/games/")
-for yaml_file in os.listdir(lutris_path):
 
+for yaml_file in os.listdir(lutris_path):
     yaml_path = os.path.join(lutris_path, yaml_file)
     with open(yaml_path, "r") as f:
         yaml_data = yaml.safe_load(f)
@@ -196,10 +189,10 @@ for yaml_file in os.listdir(lutris_path):
 
         lutris_game = LutrisGame(game_name, exe, pfx_path)
 
-        lutris_games.append(lutris_game)
+        variables.lutris_games.append(lutris_game)
         lutris_game.print()
 
 
-# if __name__ == "__main__":
-#     app = ui.SaveManagerApp()
-#     app.run()
+if __name__ == "__main__":
+    app = ui.SaveManagerApp()
+    app.run()

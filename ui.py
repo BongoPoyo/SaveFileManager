@@ -46,13 +46,29 @@ class DefaultPrefixesView(HorizontalGroup):
 
 
 class SteamGameView(VerticalGroup):
+    def on_button_pressedf(self, event: Button.Pressed) -> None:
+        button_id = event.button.id
+
+        if not button_id:
+            return
+
+        print(button_id)
+
+        match = re.search(r'\d+$', button_id)
+        index = 0
+        if match:
+            index = int(match.group())
+
+        path = variables.library_folders[index].pfx_path
+        subprocess.run(
+            ["xdg-open", os.path.expanduser(path)], check=False)
+
     def compose(self) -> ComposeResult:
-        for steam_game in variables.steam_games:
+        for index, steam_game in enumerate(variables.steam_games):
             with Horizontal():
                 yield Button(steam_game.app_id)
                 # yield Label(steam_game.app_id),
-                yield Button(steam_game.game_name)
-
+                yield Button(steam_game.game_name, id=f"SteamGame{index}")
             # yield Button(steam_game.game_name)
 
 
